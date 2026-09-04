@@ -1,12 +1,12 @@
-# Nguong cho bai nay. Nguong MAC DINH cua cong duoc hieu chuan tu mot bai TAP CHI
-# (TNSE 2026, 49 tham khao, 9 cong thuc danh so). Bai nay la workshop paper trong ky yeu
-# Springer LNICST, 12-16 trang, nen nguong tap chi khong ap thang duoc.
+# Nguong cho bai nay: Springer LNICST, WORKSHOP/CONFERENCE full paper 12-16 trang.
+# Nguong MAC DINH cua cong hieu chuan tu mot bai TAP CHI (TNSE 2026: 49 ref, 9 cong thuc),
+# khong ap thang duoc cho ky yeu hoi nghi.
 #
-# ⚠ CHUA HIEU CHUAN THAT: chua do mot bai LNICST cung ky yeu de lay nguong. Con so duoi day
-#   la SAN TAM DAT theo do dai bai, khong phai do duoc. Phai do mot bai dich truoc khi tin.
+# ⚠ CHUA HIEU CHUAN THAT tren mot bai LNICST cu the. Con so duoi la san theo do dai bai va
+#   theo yeu cau cua ban to chuc, khong phai do duoc. Do mot bai dich truoc khi tin.
 
-references 18  # 14 trang LNICST; san tam dat, CHUA do tren bai LNICST nao. Hien co 19.
-display_equations 1  # bai DO DAC, khong phai bai ly thuyet: mot ham muc tieu la du. Nguong 3 cua mac dinh vien dan ba phep thu hinh thuc cua MOT BAI KHAC, khong lien quan o day. Them cong thuc chi de qua cong la DON BAI.
-figures 4  # giu nguyen mac dinh
-tables 2  # giu nguyen mac dinh
-sections 6  # giu nguyen mac dinh
+references 16  # hoi nghi: ~16 la muc ban to chuc neu. Bai co dung 16. Tap chi thi khac.
+display_equations 5  # bai DO DAC, nhung giao thuc phai phat bieu hinh thuc duoc: khong gian thuc the, dem luu vuc, chi bao da cuc tri, rang buoc ngan sach, ti so hieu ung tren nhieu seed, ham phan quyet. Hien co 8.
+figures 4
+tables 2
+sections 6

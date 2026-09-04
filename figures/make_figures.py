@@ -251,7 +251,10 @@ def tables_and_macros():
         "numCells": D["cells_total"],
         "numCellsMulti": cells_mm,
         "numSeeds": D["seeds"],
-        "numBudget": "{:,}".format(D["budget"]).replace(",", "."),
+        # ⛔ KHONG dung dau cham ngan nghin trong bai TIENG ANH: "20.000" doc thanh hai muoi
+        # phay khong. Dau cach mong `\,` la quy uoc Springer va doc dung o moi ngon ngu.
+        # Cong check_language chi do KY TU tieng Viet nen no khong thay quy uoc SO.
+        "numBudget": "{:,}".format(D["budget"]).replace(",", "\\,"),
         "numInst": D["n_inst"],
         "numStarts": D["n_starts"],
         "numUnits": len(D["methods"]),
@@ -410,7 +413,7 @@ def a2_macros(nums):
     if not A2:
         return nums
     N = float(A2["n_studies"])
-    nums["numStudies"] = "{:,}".format(A2["n_studies"]).replace(",", ".")
+    nums["numStudies"] = "{:,}".format(A2["n_studies"]).replace(",", "\\,")
     nums["numStudyCells"] = A2["study_cells"]
     nums["numStudySeeds"] = A2["study_seeds"]
     for r, key in (("restart-lbfgs", "Restart"), ("cmaes", "Cmaes"), ("de", "De")):

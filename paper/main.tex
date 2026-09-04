@@ -141,7 +141,7 @@ Power and beam allocation in multi-beam satellite and aerial systems is a long-s
 problem~\cite{ntnsurvey}. The objective is typically a sum rate or a fairness-weighted variant,
 the constraints are a total power budget and per-beam limits, and the coupling between beams
 comes through interference; formulations of this kind appear both as fractional
-programmes~\cite{ntnfrac} and as joint beam-direction and resource problems in dynamic LEO
+programmes~ and as joint beam-direction and resource problems in dynamic LEO
 constellations~\cite{ntnbeam}. Non-terrestrial access became a first-class part of the
 standards with 3GPP Release~17, and the deployment experience since then is
 surveyed in~\cite{ntnroad}. Two features make the non-terrestrial case harder than its
@@ -167,7 +167,7 @@ drawn from a distribution whose width contracts over the run. Quantum-inspired e
 algorithms represent a population as probability amplitudes and update them with rotation gates.
 These methods run entirely on classical hardware, which is the source of their appeal for
 on-board or edge deployment where no quantum device is available. They have been applied to UAV
-trajectory planning~\cite{qpsouav,qpsomulti} and, more recently, to trajectory optimisation in
+trajectory planning~\cite{qpsouav} and, more recently, to trajectory optimisation in
 low-altitude networks~\cite{qstate}; broader assessments of quantum and quantum-inspired
 optimisation for wireless systems are given in~\cite{qwireless,qi6g}, both of which conclude
 that these methods are best regarded as promising heuristics rather than established
@@ -211,7 +211,7 @@ of our knowledge it has not been applied to a telecommunications resource alloca
 \subsection{Seed variance as the yardstick for an effect}
 
 That the random seed alone can move a reported result by more than the method under study is well
-documented in machine learning benchmarking~\cite{seedrl,seedllm,twovariances}, with single-seed
+documented in machine learning benchmarking~\cite{seedrl,twovariances}, with single-seed
 reporting shown to be a poor estimator of the repeated-run mean~\cite{twovariances}. The practice
 we adopt is to report an effect \emph{relative} to that spread, so a reader can see whether a
 difference is larger or smaller than the noise floor of the experiment itself.
@@ -235,14 +235,22 @@ drawn uniformly from $[1,2]$ and off-diagonal entries uniformly from $[0, g_{\ma
 $g_{\max}$ controls interference strength. We set $P_{\mathrm{tot}} = K$ and $\sigma^2 = 1$.
 
 Three knobs generate the instance space: the beam count $K$, the interference bound $g_{\max}$,
-and the distortion strength $\kappa$. Their grid gives \numCells{} configurations, and we draw
-\numInst{} independent instances per configuration, for \numUnits{} units in total. The unit of
-analysis is the (configuration, instance) pair.
+and the distortion strength $\kappa$. Writing $\mathcal{C}$ for the configuration grid and
+$\mathcal{U}$ for the set of units,
+\begin{equation}
+  \mathcal{C} \;=\; \mathcal{K}\times\mathcal{G}\times\mathcal{X},
+  \qquad
+  \mathcal{U} \;=\; \{\, u=(c,i) \;:\; c\in\mathcal{C},\; i=1,\dots,I \,\},
+  \label{eq:space}
+\end{equation}
+with $|\mathcal{C}|=\numCells$, $I=\numInst$ instances per configuration and
+$|\mathcal{U}|=\numUnits$. The unit $u$, not the individual run, is the unit of analysis; seeds
+are repetitions \emph{inside} a unit.
 
 \subsection{Arm A: mapping the instance space}
 
-For each unit we run \numStarts{} independent local searches from uniformly drawn starting points
-and count how many \emph{distinct} local optima they reach. Three categories are excluded from
+For each unit of~\eqref{eq:space} we run \numStarts{} independent local searches from uniformly
+drawn starting points and count how many \emph{distinct} local optima they reach. Three categories are excluded from
 that count, because including any of them would manufacture multimodality:
 
 \begin{enumerate}
@@ -254,9 +262,22 @@ that count, because including any of them would manufacture multimodality:
       solver's own convergence noise rather than a materially different basin.
 \end{enumerate}
 
+Formally, let $V(u)=\{v_1\ge v_2\ge\dots\ge v_m\}$ be the objective values of the scored runs
+at unit $u$, sorted descending. The retained set $B(u)$ is built greedily,
+\begin{equation}
+  B(u) \;=\; \{v_1\} \cup
+  \Bigl\{\, v_j \;:\; \min_{w \in B(u)} |v_j - w| \;>\; \tau\,|v_1| \,\Bigr\},
+  \qquad \tau = 0.01,
+  \label{eq:basins}
+\end{equation}
+and the unit is called multimodal when more than one basin survives,
+\begin{equation}
+  \mathrm{MM}(u) \;=\; \mathbf{1}\bigl[\,|B(u)| > 1\,\bigr].
+  \label{eq:mm}
+\end{equation}
 The excluded counts are recorded rather than discarded, so a reader can see how much of the
-sample each rule removed. The third rule is a threshold and therefore a choice; we return to it
-in Section~\ref{sec:threats}.
+sample each rule removed. The threshold $\tau$ is a choice, and we return to it in
+Section~\ref{sec:threats}.
 
 \subsection{Arm B: budget-matched comparison}
 
@@ -265,9 +286,34 @@ Four optimisers are compared: a quantum-inspired particle swarm method, CMA-ES, 
 evolution and random-restart L-BFGS-B. Every method receives the same budget of \numBudget{}
 objective evaluations, and the budget is \emph{counted inside the objective} rather than
 estimated from iteration counts, so it is enforced rather than assumed. Each method is repeated
-over \numSeeds{} seeds. Seeds are repetitions inside a unit, not independent observations; this
-is declared in advance because the alternative inflates significance.
+over $S=\numSeeds$ seeds. The budget is enforced by a counter carried in the objective itself:
+writing $n_m(u,s)$ for the number of calls a method $m$ has made,
+\begin{equation}
+  \text{a run terminates as soon as } \; n_m(u,s) \;\ge\; N_{\max} = \numBudget ,
+  \label{eq:budget}
+\end{equation}
+so that no method can exceed the budget through an implementation detail such as an inner line
+search. For each unit and method we record the mean and the spread across seeds,
+\begin{equation}
+  \mu_m(u) = \frac{1}{S}\sum_{s=1}^{S} f^{\star}_m(u,s),
+  \qquad
+  \sigma_m(u) = \Bigl[\tfrac{1}{S-1}\textstyle\sum_{s}\bigl(f^{\star}_m(u,s)-\mu_m(u)\bigr)^2\Bigr]^{1/2},
+  \label{eq:agg}
+\end{equation}
+where $f^{\star}_m(u,s)$ is the best sum rate method $m$ reached at unit $u$ with seed $s$.
 \end{sloppypar}
+
+The quantity we report for a pair of methods $(a,b)$ is the effect measured against the spread
+the seed alone produces,
+\begin{equation}
+  \Delta_{ab}(u) = \mu_a(u)-\mu_b(u),
+  \qquad
+  r_{ab}(u) = \frac{|\Delta_{ab}(u)|}{\max\{\sigma_a(u),\,\sigma_b(u)\}} ,
+  \label{eq:ratio}
+\end{equation}
+with $r_{ab}$ defined only where the denominator is positive. Units where it vanishes are not
+discarded: both methods were deterministic across all $S$ seeds there, which is itself reported
+in Section~\ref{sec:results}.
 
 \subsection{Reconstructing an underpowered study}
 
@@ -276,8 +322,18 @@ size usually reported have concluded? We draw \numStudies{} synthetic studies. E
 \numStudyCells{} configurations at random, one instance within each, and \numStudySeeds{} of the
 \numSeeds{} available seeds, then reports its verdict by majority across its units.
 
-This is resampling, not new measurement. It says how well a small design resolves the effect,
-\emph{given} that the full data describe the truth. It is a statement about the design, not about
+Formally a study draws $\mathcal{C}_0\subset\mathcal{C}$ with $|\mathcal{C}_0|=\numStudyCells$,
+one instance per selected configuration giving units $\mathcal{U}_0$, and a seed subset
+$\Sigma_0$ with $|\Sigma_0|=\numStudySeeds$. Writing $\hat\mu_m(u)$ for the mean over
+$\Sigma_0$ only, the study reports
+\begin{equation}
+  V(\mathcal{U}_0) \;=\; \operatorname{sign}
+  \sum_{u\in\mathcal{U}_0} \operatorname{sign}\bigl(\hat\mu_a(u)-\hat\mu_b(u)\bigr),
+  \label{eq:verdict}
+\end{equation}
+that is, a majority verdict across its own units. This is resampling, not new measurement. It
+says how well a small design resolves the effect, \emph{given} that the full data describe the
+truth. It is a statement about the design, not about
 the world, and it creates no information the full data do not already contain.
 
 % =====================================================================
@@ -286,8 +342,9 @@ the world, and it creates no information the full data do not already contain.
 
 \subsection{A single screening point can report the opposite of the map}
 
-Figure~\ref{fig:map} shows the instance space. \numCellsMulti{} of the \numCells{} configurations
-contain at least one multimodal instance, so multimodality is common but far from universal.
+Figure~\ref{fig:map} shows the instance space. Under the criterion of~\eqref{eq:basins} and~\eqref{eq:mm}, \numCellsMulti{} of the
+\numCells{} configurations contain at least one multimodal instance, so multimodality is common
+but far from universal.
 
 The highlighted tile matters more than the rest. It is the configuration at which an earlier
 screening run for this problem was carried out, at $K=\numSpikeK$, $g_{\max}=\numSpikeG$ and
@@ -340,9 +397,10 @@ global search method evaluated there has nothing to demonstrate.
 \subsection{All four optimisers, before splitting by region}
 
 Table~\ref{tab:methods} reports the four optimisers over the whole grid, before any split by
-region. Restart local search is best or tied in every unit. The two population baselines sit
-below the QI method on mean rank, which is the comparison a paper in this area would typically
-report and would typically report as a win.
+region, ranking them by the unit means $\mu_m(u)$ of~\eqref{eq:agg} and reporting the seed spread
+$\sigma_m(u)$ alongside. Restart local search is best or tied in every unit. The two population
+baselines sit below the QI method on mean rank, which is the comparison a paper in this area
+would typically report and would typically report as a win.
 
 \begin{table}[t]
 \centering
@@ -392,8 +450,9 @@ spends its budget maintaining a diversity it cannot convert into basin coverage 
 
 \subsection{Every effect is smaller than the seed spread, and no direction reverses}
 
-The right panel of Fig.~\ref{fig:verdict} places each method difference against the spread
-caused by the seed alone. The median ratio is \numUniEffectRatio{} on unimodal units and
+The right panel of Fig.~\ref{fig:verdict} groups the units by the ratio $r_{ab}$ of
+\eqref{eq:ratio}, which places each method difference against the spread caused by the seed
+alone. The median ratio is \numUniEffectRatio{} on unimodal units and
 \numMultiEffectRatio{} on multimodal units. Both are below one: the difference between the two
 methods is smaller than the difference one observes by changing the random seed and nothing else.
 
@@ -425,7 +484,8 @@ the units where the baseline is most dependable.
 \subsection{What a study of the usual size would have concluded}
 
 Figure~\ref{fig:under} reports \numStudies{} reconstructed studies of \numStudyCells{}
-configurations and \numStudySeeds{} seeds each. Two findings follow, and the second is the one we
+configurations and \numStudySeeds{} seeds each, each reporting the majority verdict
+of~\eqref{eq:verdict}. Two findings follow, and the second is the one we
 would ask readers to take away.
 
 \begin{figure}[t]
@@ -517,19 +577,19 @@ instance generator. Nothing here establishes how QI methods behave on scheduling
 placement problems in the same networks, and the instance space of those problems would have to
 be mapped separately. What transfers is the protocol; the verdict does not.
 
-\textbf{The multimodality criterion is a choice.} Optima separated by less than \numMinSpread\%
-of the best sum rate are treated as one basin. A stricter threshold would report more
+\textbf{The multimodality criterion is a choice.} The threshold $\tau$ of~\eqref{eq:basins}
+treats optima separated by less than \numMinSpread\% of the best sum rate as one basin. A stricter threshold would report more
 multimodality and a looser one less. The threshold is stated rather than implied, and the
 excluded non-finite and non-converged runs are counted rather than dropped silently, so a reader
 can see the size of each exclusion.
 
 \textbf{Restart local search is a baseline, not a recommendation.} That it wins here follows from
-the geometry of this objective, which is smooth and box-constrained. It is the baseline a
+the geometry of the objective in~\eqref{eq:sumrate}, which is smooth and box-constrained. It is the baseline a
 reviewer reaches for first, which is why it is the one we ran. It is not a claim about what
 should be deployed on a payload, where memory and code size constraints may exclude it.
 
-\textbf{Budget is counted in evaluations, not wall-clock time.} Evaluation counting is the harder
-constraint to satisfy and the easier one to verify, but it treats generously a method whose
+\textbf{Budget is counted in evaluations, not wall-clock time.} The stopping rule
+of~\eqref{eq:budget} is the harder constraint to satisfy and the easier one to verify, but it treats generously a method whose
 per-call overhead is large. We report the evaluation budget rather than a timing comparison for
 that reason, and a wall-clock study would be a useful complement.
 
@@ -592,10 +652,6 @@ algorithm: insights via instance space analysis. arXiv:2401.08142 (2024)
 Henderson, P., Islam, R., Bachman, P., Pineau, J., Precup, D., Meger, D.: Deep reinforcement
 learning that matters. In: AAAI (2018)
 
-\bibitem{seedllm}
-Assessing the macro and micro effects of random seeds on fine-tuning large language models.
-arXiv:2503.07329 (2025)
-
 \bibitem{twovariances}
 A tale of two variances: when single-seed benchmarks fail in Bayesian deep learning.
 arXiv:2604.23114 (2026)
@@ -608,10 +664,6 @@ DOI 10.1109/COMST.2023.3347145
 \bibitem{ntnroad}
 5G NR non-terrestrial networks: from early results to the road ahead. arXiv:2601.04882 (2026)
 
-\bibitem{ntnfrac}
-Non-terrestrial network (NTN): a novel alternate fractional programming for the downlink
-channels power allocation. arXiv:2401.10251 (2024)
-
 \bibitem{ntnbeam}
 Joint beam direction control and radio resource allocation in dynamic multi-beam LEO satellite
 networks. arXiv:2401.09711 (2024)
@@ -619,10 +671,6 @@ networks. arXiv:2401.09711 (2024)
 \bibitem{qpsouav}
 UAV trajectory planning based on improved quantum particle swarm optimization. In: Lecture Notes
 in Electrical Engineering. Springer (2023). DOI 10.1007/978-981-99-7505-1\_63
-
-\bibitem{qpsomulti}
-Multi-strategy quantum particle swarm optimization for efficient path planning.
-J. Supercomput. (2025). DOI 10.1007/s11227-025-07901-8
 
 \bibitem{qstate}
 Quantum-driven state-reduction for reliable UAV trajectory optimization in low-altitude
