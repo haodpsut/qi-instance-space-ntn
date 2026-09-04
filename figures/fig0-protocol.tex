@@ -1,0 +1,65 @@
+% Hinh FLOW: giao thuc hai arm + phep giao + phan dung lai.
+% Bo style nha: paper-lab/transaction-figure-kit/flow/txstyle.tex
+%
+% ⛔ BO CUC PHAI VUA KHO CHU. Ban dau ve mot hang ngang rong 597pt trong khi kho chu LNCS chi
+% 347pt; thu lai thi chu \footnotesize con khoang 5pt. Do dung lop loi da ghi trong so
+% (hinh ngang 7,25in nhet vao cot 3,5in => chu 3,9pt). Ban nay xep HAI COT de ty le gan 1:1.
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\input{txstyle.tex}
+\definecolor{accent}{HTML}{2C6E9B}
+\begin{document}
+\begin{tikzpicture}[node distance=4mm,
+   blk/.append style={minimum width=52mm, minimum height=9mm},
+   sml/.append style={minimum width=52mm, minimum height=7mm},
+   prop/.append style={minimum width=52mm, minimum height=9mm}]
+
+% ================= cot trai: DO =================
+\node[blk] (gen) {Instance generator: $K \times g_{\max} \times \kappa$};
+\node[sml, below=of gen] (unit) {48 configurations $\times$ 3 instances $=$ 144 units};
+\node[blk, below=6mm of unit] (armA)
+  {\textbf{Arm A} \, map the instance space};
+\node[sml, below=of armA] (armAs)
+  {30 multi-starts $\cdot$ count distinct basins};
+\node[sml, below=1.5mm of armAs, fill=black!1]
+  (excl) {excluded and reported: non-finite $\cdot$ non-converged $\cdot$ $<\!1\%$ apart};
+\node[blk, below=6mm of excl] (armB)
+  {\textbf{Arm B} \, matched-budget comparison};
+\node[sml, below=of armB] (armBs)
+  {4 optimisers $\cdot$ 30 seeds $\cdot$ 20\,000 evaluations};
+\node[sml, below=1.5mm of armBs, fill=black!1]
+  (cnt) {budget counted \emph{inside} the objective};
+
+\draw[flow] (gen) -- (unit);
+\draw[flow] (unit) -- (armA);
+\draw[flow] (armA) -- (armAs);
+\draw[flow] (armB) -- (armBs);
+\draw[flow] (unit.west) -- ++(-5mm,0) |- (armB.west);
+
+% ================= cot phai: PHAN TICH =================
+\node[prop, right=13mm of armA, yshift=-3mm] (cross)
+  {\textbf{Cross the two arms}};
+\node[sml, below=of cross] (crosss)
+  {does position in the map predict the verdict?};
+\node[prop, below=7mm of crosss] (resamp)
+  {\textbf{Reconstruct 5\,000 small studies}};
+\node[sml, below=of resamp] (resamps)
+  {4 configurations $\times$ 5 seeds, resampled};
+\node[sml, below=7mm of resamps, fill=black!1] (out)
+  {what a study of the usual size would conclude};
+
+\draw[flow] (cross) -- (crosss);
+\draw[flow] (crosss) -- (resamp);
+\draw[flow] (resamp) -- (resamps);
+\draw[flow] (resamps) -- (out);
+\draw[flow] (armAs.east) -- ++(4mm,0) |- (cross.west);
+\draw[flow] (armBs.east) -- ++(6mm,0) |- (crosss.east);
+
+% ================= vung nhom =================
+\begin{scope}[on background layer]
+  \node[zone, fit=(gen)(cnt), label={[zlab, anchor=south west]south west:MEASURE}] {};
+  \node[zone, fit=(cross)(out), label={[zlab, anchor=south west]south west:ANALYSE}] {};
+\end{scope}
+\end{tikzpicture}
+\end{document}

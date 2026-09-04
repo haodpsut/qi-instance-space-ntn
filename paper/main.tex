@@ -99,6 +99,15 @@ advance. Crossing the two arms lets us ask a question neither answers alone: doe
 instance space predict the verdict? Finally we use the full data to reconstruct what a study of
 the size usually reported would have concluded.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/out/fig0-protocol.pdf}
+\caption{The protocol. Two measurement arms run over the same grid of units; crossing them asks
+whether position in the map predicts the verdict, and resampling the full data asks what a study
+of the size usually reported would have concluded.}
+\label{fig:protocol}
+\end{figure}
+
 \paragraph{What we find.}
 Position does predict the verdict, and in the direction opposite to the usual argument for
 population-based search. The QI method is competitive precisely where the landscape is
@@ -279,20 +288,29 @@ which an earlier screening run was performed.}
 
 \subsection{Multimodality comes from amplifier distortion, not from interference}
 
-Table~\ref{tab:knobs} breaks the map down by knob, and the structure is not what one would guess.
+Figure~\ref{fig:knobs} breaks the map down by knob, and the structure is not what one would guess.
 Beam count and interference strength both matter, but weakly: the multimodal fraction rises from
 \numKnobKLo\% to \numKnobKHi\% across the range of $K$, and from \numKnobGmaxLo\% to
 \numKnobGmaxHi\% across $g_{\max}$. The distortion term is different in kind. It moves the
 fraction from \numKnobKappaLo\% to \numKnobKappaHi\%, and the movement is a step rather than a
 gradient: the two lower levels behave alike and the highest level is multimodal everywhere.
 
-\begin{table}[t]
+\begin{figure}[t]
 \centering
-\caption{Fraction of units that are multimodal, by knob and level. Distortion is the dominant
-driver, and the two lower distortion levels are nearly indistinguishable.}
-\label{tab:knobs}
+\begin{minipage}{0.47\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../figures/out/fig2-knobs.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.5\textwidth}
+\centering
+\small
 \input{../figures/out/tab2-knobs.tex}
-\end{table}
+\end{minipage}
+\caption{Fraction of units that are multimodal, by knob and level. Beam count and interference
+move the fraction gradually; distortion moves it as a step, from \numKnobKappaLo\% at the two
+lower levels to \numKnobKappaHi\% at the highest.}
+\label{fig:knobs}
+\end{figure}
 
 This has a practical consequence for experiment design in this area. Interference strength is the
 knob most often swept, because it is the one with an obvious physical interpretation for a
@@ -317,7 +335,7 @@ being better. The last column is the median standard deviation across the \numSe
 
 \subsection{Position in the map decides the verdict}
 
-Table~\ref{tab:verdict} and the left panel of Fig.~\ref{fig:verdict} cross the two arms. Restart
+Table~\ref{tab:verdict} and Fig.~\ref{fig:verdict} cross the two arms. Restart
 local search is best or tied in \numRestartBest{} of \numUnits{} units, and the QI method wins
 \numQpsoWinTotal{} of them. That alone would be a familiar negative result. The structure behind
 it is the part worth reporting.
@@ -332,12 +350,14 @@ column is the absolute mean difference divided by the seed-induced standard devi
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.49\textwidth]{../figures/out/fig2-verdict-by-region.pdf}
+\includegraphics[width=0.49\textwidth]{../figures/out/fig3-per-unit.pdf}
 \hfill
-\includegraphics[width=0.49\textwidth]{../figures/out/fig3-effect-vs-seed-noise.pdf}
-\caption{Left: outcome against restart local search, split by region of the map. Right:
-distribution of the effect size in units of the seed-induced spread; the dashed line marks the
-point at which a method difference equals the spread produced by changing the seed alone.}
+\includegraphics[width=0.49\textwidth]{../figures/out/fig4-effect-vs-seed-noise.pdf}
+\caption{Left: every one of the \numUnits{} units, plotted by the difference in mean sum rate
+between the QI method and restart local search; no unit falls to the right of zero. Right: the
+same units placed by effect size against seed spread, with the diagonal marking equality. The
+\numDropZeroSd{} units in which both methods were deterministic across all \numSeeds{} seeds
+are drawn on the lower band rather than dropped.}
 \label{fig:verdict}
 \end{figure}
 
@@ -353,7 +373,7 @@ spends its budget maintaining a diversity it cannot convert into basin coverage 
 
 \subsection{Every effect is smaller than the seed spread, and no direction reverses}
 
-The right panel of Fig.~\ref{fig:verdict} reports each method difference in units of the spread
+The right panel of Fig.~\ref{fig:verdict} places each method difference against the spread
 caused by the seed alone. The median ratio is \numUniEffectRatio{} on unimodal units and
 \numMultiEffectRatio{} on multimodal units. Both are below one: the difference between the two
 methods is smaller than the difference one observes by changing the random seed and nothing else.
@@ -364,6 +384,25 @@ this small is exactly the regime in which an underpowered study returns whicheve
 seeds happened to give, and in which a single-seed study cannot be distinguished from a study
 reporting noise. The next subsection quantifies that.
 
+\subsection{The baseline is also the reproducible one}
+
+A result that emerged only when we stopped discarding the zero-variance units deserves separate
+mention. Restart local search returns the same solution on every one of the \numSeeds{} seeds in
+\numDetRestartlbfgsPct\% of units (\numDetRestartlbfgs{} of \numUnits{}). The corresponding
+figures are \numDetCmaesPct\% for CMA-ES, \numDetQpsoPct\% for the QI method and
+\numDetDePct\% for differential evolution.
+
+For a deployment context this matters independently of solution quality. An allocation recomputed
+on every pass, on a payload with no operator in the loop, is easier to certify and to debug when
+it does not depend on a seed. The baseline that wins on quality here also happens to be the one
+whose output is reproducible, and a comparison that reports only mean sum rate does not show
+this.
+
+We note that this is also why the right panel of Fig.~\ref{fig:verdict} would have been
+misleading had we drawn it naively. A ratio of effect to seed spread is undefined when the spread
+is zero, and dropping those \numDropZeroSd{} units would have removed from the figure precisely
+the units where the baseline is most dependable.
+
 \subsection{What a study of the usual size would have concluded}
 
 Figure~\ref{fig:under} reports \numStudies{} reconstructed studies of \numStudyCells{}
@@ -372,7 +411,7 @@ would ask readers to take away.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/out/fig4-underpowered.pdf}
+\includegraphics[width=\textwidth]{../figures/out/fig5-underpowered.pdf}
 \caption{Verdicts of \numStudies{} reconstructed studies at the size usually reported. Left: the
 verdict as a function of which baseline the study chose. Right: the verdict as a function of
 where in the instance space the study happened to screen.}
