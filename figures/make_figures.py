@@ -58,26 +58,51 @@ def cell_frac(K, g, k):
 
 # ---------------------------------------------------------------- Fig 1: ban do instance space
 def fig_map():
-    fig, axes = plt.subplots(1, len(KA), figsize=(6.6, 2.15), sharey=True)
+    """Ban do instance space.
+
+    ⛔ BA LOI CUA BAN TRUOC, tim ra khi ket xuat PNG va NHIN:
+      1. nhan o spike dat o `i - 0.40` nen DE LEN o hang tren va bi cat.
+      2. nhan ghi "spike 28/07": do la NGAY LAM VIEC NOI BO. Nguoi doc khong hieu, va bai nay
+         review DOUBLE-BLIND nen mot moc thoi gian noi bo la chi tiet ro ri.
+      3. khong co thang mau, nen sac do khong doc duoc neu khong nho chu n/3.
+    ⇒ Nhan dua RA NGOAI luoi kem mui ten, doi chu sang ngon ngu nguoi doc hieu, va them thang mau.
+    """
+    fig, axes = plt.subplots(1, len(KA), figsize=(5.35, 1.92), sharey=True,
+                             gridspec_kw={"wspace": 0.10})
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("m", [C_UNI, C_MULTI])
+    im = None
     for ax, k in zip(axes, KA):
         M = np.array([[cell_frac(K, g, k) for g in GM] for K in KS])
-        ax.imshow(M, cmap=matplotlib.colors.LinearSegmentedColormap.from_list(
-            "m", [C_UNI, C_MULTI]), vmin=0, vmax=1, aspect="auto")
+        im = ax.imshow(M, cmap=cmap, vmin=0, vmax=1, aspect="auto")
         for i, K in enumerate(KS):
             for j, g in enumerate(GM):
                 f = M[i, j]
                 ax.text(j, i, "%d/3" % round(f * 3), ha="center", va="center",
-                        fontsize=6.5, color="white" if f > 0.5 else "#333")
-                if (K, g, k) == SPIKE:
-                    ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fill=False,
-                                               edgecolor="#cc2200", lw=2.0))
-                    ax.text(j, i - 0.40, "spike 28/07", ha="center", va="center",
-                            fontsize=5.2, color="#cc2200", fontweight="bold")
-        ax.set_xticks(range(len(GM)));  ax.set_xticklabels(["%.2f" % g for g in GM])
-        ax.set_yticks(range(len(KS)));  ax.set_yticklabels([str(K) for K in KS])
-        ax.set_xlabel(r"$g_{\max}$")
-        ax.set_title(r"$\kappa$ = %.2f" % k, fontsize=8)
-    axes[0].set_ylabel("beams $K$")
+                        fontsize=6.4, color="white" if f > 0.5 else "#333")
+        # luoi mong giua cac o, de dem o bang mat
+        ax.set_xticks(np.arange(-.5, len(GM), 1), minor=True)
+        ax.set_yticks(np.arange(-.5, len(KS), 1), minor=True)
+        ax.grid(which="minor", color="white", linewidth=0.8)
+        ax.tick_params(which="minor", length=0)
+        ax.set_xticks(range(len(GM))); ax.set_xticklabels(["%.2f" % g for g in GM], fontsize=6.6)
+        ax.set_yticks(range(len(KS))); ax.set_yticklabels([str(K) for K in KS], fontsize=6.6)
+        ax.set_xlabel(r"$g_{\max}$", fontsize=7.5, labelpad=1.5)
+        ax.set_title(r"$\kappa = %.2f$" % k, fontsize=7.5, pad=3)
+        # ⭐ o ma mot lan sang don le da chon
+        if any((K, g, k) == SPIKE for K in KS for g in GM):
+            i0, j0 = KS.index(SPIKE[0]), GM.index(SPIKE[1])
+            ax.add_patch(plt.Rectangle((j0 - .5, i0 - .5), 1, 1, fill=False,
+                                       edgecolor="#cc2200", lw=1.6, zorder=5))
+            # ⛔ KHONG dat chu trong hinh. Thu HAI lan deu va cham: lan dau nhan de len o hang
+            # tren va bi cat, lan hai de len nhan truc g_max va so 0.30. Khung do da du noi bat
+            # de tim ngay, va chu thich hinh da noi no la gi. Chu o day chi them mot vat can.
+            # ⚠ Va lan go bo dau tien dung str.replace nhung chuoi khong khop nen no KHONG LAM
+            # GI va cung khong bao loi; hinh van y nguyen. Sua tep thi phai doc lai de kiem.
+    axes[0].set_ylabel("beams $K$", fontsize=7.5)
+    cb = fig.colorbar(im, ax=axes, fraction=0.026, pad=0.012, ticks=[0, 1/3, 2/3, 1])
+    cb.ax.set_yticklabels(["0/3", "1/3", "2/3", "3/3"], fontsize=6.2)
+    cb.set_label("instances that are multimodal", fontsize=6.6, labelpad=2)
+    cb.outline.set_linewidth(0.5)
     fig.savefig(os.path.join(OUT, "fig1-instance-space.pdf"))
     plt.close(fig)
 
@@ -95,12 +120,12 @@ def fig_knobs():
              / max(1, len([c for c in D["instance_space"] if c[key] == v])) for v in vals]
         ax.plot(x, y, marker=mk, ls=ls, color=col, label=lab, markersize=4.2,
                 markerfacecolor="white", markeredgewidth=1.0)
-        for xi, yi, v in zip(x, y, vals):
-            ax.annotate("%g" % v, (xi, yi), textcoords="offset points", xytext=(0, -11),
-                        ha="center", fontsize=6, color=col)
+        # ⛔ Bo nhan gia tri tren tung diem: ba chuoi nam o cung vi tri x nen chung DE LEN NHAU
+        # ("0.1" dinh vao "4", "0.30" dinh vao "8"). Muc cu the da co trong bang ngay canh hinh;
+        # hinh nay chi de thay HINH DANG, tuc kappa la buoc nhay con hai cai kia la doc thoai.
     ax.set_xticks([]); ax.set_ylim(-8, 108)
     ax.set_xlabel("knob level, low to high", fontsize=7.5)
-    ax.set_ylabel("units that are multimodal (\\%)")
+    ax.set_ylabel("multimodal units (\\%)", fontsize=7.2)
     ax.grid(True, axis="y", linewidth=0.3, alpha=0.35)
     ax.legend(frameon=False, loc="upper left")
     fig.savefig(os.path.join(OUT, "fig2-knobs.pdf"))
@@ -109,10 +134,15 @@ def fig_knobs():
 
 # ------------------------- Fig 3: TUNG don vi mot, thay vi cot chong
 def fig_per_unit():
-    """⭐ Ve TAT CA 144 don vi. Cot chong chi cho ba con so; hinh nay cho thay phan bo, va cho
-    thay ngay rang KHONG mot don vi nao nam ben phai vach 0."""
-    fig, ax = plt.subplots(figsize=(2.22, 1.62))   # dat o 0,49 kho chu LNCS = 2,35 in
+    """⭐ Ve TAT CA 144 don vi.
+
+    ⛔ Ban truoc co hai loi chi thay khi NHIN: hai nhan "restart better" va "QI better" DINH
+    VAO NHAU thanh mot chuoi vo nghia, va o chu giai DE LEN chinh cac diem hang unimodal.
+    ⇒ Bo chu giai, dua so luong vao nhan truc y, va chi giu MOT nhan huong.
+    """
+    fig, ax = plt.subplots(figsize=(2.22, 1.62))
     rng = np.random.default_rng(7)
+    counts = {}
     for lab, want, col, mk in (("unimodal", False, "#7f8c9b", "o"),
                                ("multimodal", True, ACCENT, "^")):
         xs, ys = [], []
@@ -121,65 +151,61 @@ def fig_per_unit():
             if MM.get(k) != want:
                 continue
             xs.append(c["methods"]["qpso"]["mean"] - c["methods"]["restart-lbfgs"]["mean"])
-            ys.append(rng.normal(0, 0.16) + (1 if want else 0))
-        ax.scatter(xs, ys, s=13, marker=mk, facecolors="none", edgecolors=col,
-                   linewidths=0.8, label="%s (n=%d)" % (lab, len(xs)))
+            ys.append(rng.normal(0, 0.15) + (1 if want else 0))
+        counts[want] = len(xs)
+        ax.scatter(xs, ys, s=12, marker=mk, facecolors="none", edgecolors=col, linewidths=0.8)
     ax.axvline(0, color="#aa2d2d", lw=1.0, ls="--")
-    ax.text(0.004, 1.62, "QI better $\\rightarrow$", fontsize=6.2, color="#aa2d2d")
-    ax.text(-0.004, 1.62, "$\\leftarrow$ restart better", fontsize=6.2, color="#aa2d2d",
-            ha="right")
-    ax.set_yticks([0, 1]); ax.set_yticklabels(["unimodal", "multimodal"], fontsize=7.5)
-    ax.set_ylim(-0.6, 1.9)
-    ax.set_xlabel("mean sum rate, QI minus restart L-BFGS")
+    lo, hi = ax.get_xlim()
+    ax.set_xlim(lo, hi + (hi - lo) * 0.06)
+    ax.set_yticks([0, 1])
+    ax.set_yticklabels(["unimodal\n$n=%d$" % counts[False],
+                        "multimodal\n$n=%d$" % counts[True]], fontsize=6.6)
+    ax.set_ylim(-0.6, 1.65)
+    ax.set_xlabel("QI minus restart L-BFGS", fontsize=7.2)
+    ax.text(0.02, 0.965, "no unit lies to the right of zero", transform=ax.transAxes,
+            fontsize=6.0, color="#aa2d2d", va="top")
     ax.grid(True, axis="x", linewidth=0.3, alpha=0.35)
-    ax.legend(frameon=False, loc="lower left")
     fig.savefig(os.path.join(OUT, "fig3-per-unit.pdf"))
     plt.close(fig)
 
 
-# ------------------------- Fig 4: hieu ung so voi nhieu seed, GIU CA o phuong sai 0
+# ------------------------- Fig 4: hieu ung so voi nhieu seed, BA NHOM
 def fig_effect_vs_noise():
-    """⛔ Ban truoc LOAI 32/144 o co do lech seed = 0 va khong noi ra. Do khong phai du lieu
-    thieu, do la MOT KET QUA: ca hai phuong phap tat dinh tren 30 seed o cac o ay. Ban nay ve
-    chung thanh mot dai rieng co nhan, chu khong bo."""
-    fig, ax = plt.subplots(figsize=(2.22, 1.62))   # dat o 0,49 kho chu LNCS = 2,35 in
-    FLOOR = None
-    pts = {False: [], True: []}
-    zeros = {False: 0, True: 0}
+    """⛔ Ban truoc la tan xa log-log trai 13 bac. Tren thang do MOI diem deu nam sat duong
+    cheo, nen hinh trong nhu "hieu ung luon bang nhieu", tuc noi NGUOC voi so trung vi 0,27
+    va 0,70. Hai nhan cung chong len nhau thanh chu vo nghia.
+    ⇒ Doi sang BA NHOM dem duoc, hien du 144 don vi, khong dai luong nao khong xac dinh:
+       hieu ung < nhieu seed · hieu ung >= nhieu seed · nhieu seed = 0 (ca hai tat dinh).
+    """
+    fig, ax = plt.subplots(figsize=(2.22, 1.62))
+    cats = ["effect $<$\nseed spread", "effect $\\geq$\nseed spread",
+            "seed spread\n$=0$"]
+    vals = {False: [0, 0, 0], True: [0, 0, 0]}
     for c in D["methods"]:
         k = (c["K"], c["gmax"], c["kappa"], c["instance"])
         want = MM.get(k)
         a, b = c["methods"]["qpso"], c["methods"]["restart-lbfgs"]
-        d_ = abs(a["mean"] - b["mean"]); sd = max(a["std"], b["std"])
+        sd = max(a["std"], b["std"])
         if sd <= 1e-12:
-            zeros[want] += 1
+            vals[want][2] += 1
+        elif abs(a["mean"] - b["mean"]) / sd < 1.0:
+            vals[want][0] += 1
         else:
-            pts[want].append((d_, sd))
-    allv = [v for g in pts.values() for p in g for v in p if v > 0]
-    FLOOR = min(allv) / 6.0 if allv else 1e-6
-    for want, col, mk, lab in ((False, "#7f8c9b", "o", "unimodal"),
-                               (True, ACCENT, "^", "multimodal")):
-        if pts[want]:
-            x, y = zip(*pts[want])
-            ax.scatter(x, y, s=13, marker=mk, facecolors="none", edgecolors=col,
-                       linewidths=0.8, label="%s (n=%d)" % (lab, len(pts[want])))
-        if zeros[want]:
-            xs = [p[0] for p in pts[want]] or [FLOOR * 10]
-            ax.scatter(np.linspace(min(xs), max(xs), zeros[want]),
-                       [FLOOR] * zeros[want], s=13, marker=mk, color=col, alpha=.55,
-                       linewidths=0)
-    lim = ax.get_xlim()
-    xs = np.logspace(np.log10(max(FLOOR, 1e-9)), np.log10(max(lim[1], 1e-3)), 50)
-    ax.plot(xs, xs, color="#aa2d2d", lw=1.0, ls="--")
-    ax.set_xscale("log"); ax.set_yscale("log")
-    ax.axhline(FLOOR * 2.2, color="#999", lw=0.5, ls=":")
-    ax.text(ax.get_xlim()[0] * 1.15, FLOOR * 1.15,
-            "seed spread $=0$: %d units" % sum(zeros.values()), fontsize=6.2, color="#555")
-    ax.text(0.97, 0.06, "effect $=$ seed spread", transform=ax.transAxes, fontsize=6.2,
-            color="#aa2d2d", ha="right", rotation=0)
-    ax.set_xlabel("|mean difference|"); ax.set_ylabel("seed spread (s.d.)")
-    ax.grid(True, which="major", linewidth=0.3, alpha=0.35)
-    ax.legend(frameon=False, loc="upper left")
+            vals[want][1] += 1
+    x = np.arange(len(cats)); w = 0.38
+    ax.bar(x - w / 2, vals[False], w, color="#d9d5cc", edgecolor="#444", linewidth=0.5,
+           label="unimodal", hatch="")
+    ax.bar(x + w / 2, vals[True], w, color=ACCENT, edgecolor="#444", linewidth=0.5,
+           label="multimodal", hatch="//")
+    for xi, (u, m) in enumerate(zip(vals[False], vals[True])):
+        for off, v in ((-w / 2, u), (w / 2, m)):
+            if v:
+                ax.text(xi + off, v + 1.5, str(v), ha="center", fontsize=6.2)
+    ax.set_xticks(x); ax.set_xticklabels(cats, fontsize=6.3)
+    ax.set_ylabel("units", fontsize=7.2)
+    ax.set_ylim(0, max(max(vals[False]), max(vals[True])) * 1.24)
+    ax.legend(fontsize=6.2, frameon=False, loc="upper right")
+    ax.grid(True, axis="y", linewidth=0.3, alpha=0.35)
     fig.savefig(os.path.join(OUT, "fig4-effect-vs-seed-noise.pdf"))
     plt.close(fig)
 
@@ -268,7 +294,10 @@ def fig_underpowered():
     chat cua the gioi."""
     if not A2:
         return
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.6, 2.25))
+    # ⛔ Ban truoc de wspace mac dinh nen nhan truc cua bang PHAI de len cot cua bang TRAI,
+    # va o chu giai nam tren mot cot. Tach hai bang ra va dua chu giai xuong duoi.
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.0, 2.05),
+                                   gridspec_kw={"wspace": 0.62})
 
     # trai: theo doi thu
     rivals = ["de", "cmaes", "restart-lbfgs"]
@@ -284,7 +313,8 @@ def fig_underpowered():
     ax1.set_yticks(y); ax1.set_yticklabels([lbl[r] for r in rivals], fontsize=7)
     ax1.set_xlabel("% of reconstructed small studies"); ax1.set_xlim(0, 100)
     ax1.set_title("choice of baseline", fontsize=8)
-    ax1.legend(fontsize=5.6, loc="lower left", framealpha=.95)
+    ax1.legend(fontsize=6.0, frameon=False, ncol=3,
+               loc="upper center", bbox_to_anchor=(1.05, -0.30))
     ax1.invert_yaxis()
 
     # phai: theo vi tri sang

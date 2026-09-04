@@ -1,65 +1,71 @@
 % Hinh FLOW: giao thuc hai arm + phep giao + phan dung lai.
 % Bo style nha: paper-lab/transaction-figure-kit/flow/txstyle.tex
 %
-% ⛔ BO CUC PHAI VUA KHO CHU. Ban dau ve mot hang ngang rong 597pt trong khi kho chu LNCS chi
-% 347pt; thu lai thi chu \footnotesize con khoang 5pt. Do dung lop loi da ghi trong so
-% (hinh ngang 7,25in nhet vao cot 3,5in => chu 3,9pt). Ban nay xep HAI COT de ty le gan 1:1.
+% ⛔ BA LOI CUA BAN TRUOC, chi thay khi KET XUAT PNG VA NHIN, khong cong nao bat duoc:
+%   1. hop chu thich dai hon `minimum width` nen no NO RA HAI BEN va tran khoi vung MEASURE.
+%      Sua bang `text width` de chu XUONG DONG thay vi day khung rong ra.
+%   2. mui ten tu Arm B chay THANG QUA hop "does position..." va gach ngang chu trong do.
+%      Sua bang cach dinh tuyen qua mot cot doc rieng ben phai vung MEASURE.
+%   3. hop cuoi cua Arm B khong co mui ten noi.
+% ⚠ Bo cuc phai vua kho chu LNCS (4,80 in). Xem check_figure_scale.
 \documentclass[tikz,border=2pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \input{txstyle.tex}
 \definecolor{accent}{HTML}{2C6E9B}
 \begin{document}
-\begin{tikzpicture}[node distance=4mm,
-   blk/.append style={minimum width=52mm, minimum height=9mm},
-   sml/.append style={minimum width=52mm, minimum height=7mm},
-   prop/.append style={minimum width=52mm, minimum height=9mm}]
+\begin{tikzpicture}[node distance=3.2mm,
+   blk/.append style={text width=48mm, align=center, minimum height=8mm},
+   sml/.append style={text width=48mm, align=center, minimum height=6mm, font=\scriptsize},
+   note/.style={sml, fill=black!1, draw=inkgray!55, font=\scriptsize\itshape},
+   prop/.append style={text width=46mm, align=center, minimum height=8mm}]
 
 % ================= cot trai: DO =================
 \node[blk] (gen) {Instance generator: $K \times g_{\max} \times \kappa$};
 \node[sml, below=of gen] (unit) {48 configurations $\times$ 3 instances $=$ 144 units};
-\node[blk, below=6mm of unit] (armA)
-  {\textbf{Arm A} \, map the instance space};
-\node[sml, below=of armA] (armAs)
-  {30 multi-starts $\cdot$ count distinct basins};
-\node[sml, below=1.5mm of armAs, fill=black!1]
-  (excl) {excluded and reported: non-finite $\cdot$ non-converged $\cdot$ $<\!1\%$ apart};
-\node[blk, below=6mm of excl] (armB)
-  {\textbf{Arm B} \, matched-budget comparison};
-\node[sml, below=of armB] (armBs)
-  {4 optimisers $\cdot$ 30 seeds $\cdot$ 20\,000 evaluations};
-\node[sml, below=1.5mm of armBs, fill=black!1]
-  (cnt) {budget counted \emph{inside} the objective};
+\node[blk, below=5mm of unit] (armA) {\textbf{Arm A} \, map the instance space};
+\node[sml, below=of armA] (armAs) {30 multi-starts $\cdot$ count distinct basins};
+\node[note, below=of armAs] (excl)
+  {excluded and reported: non-finite, non-converged, $<\!1\%$ apart};
+\node[blk, below=5mm of excl] (armB) {\textbf{Arm B} \, matched-budget comparison};
+\node[sml, below=of armB] (armBs) {4 optimisers $\cdot$ 30 seeds $\cdot$ 20\,000 evaluations};
+\node[note, below=of armBs] (cnt) {budget counted inside the objective};
 
 \draw[flow] (gen) -- (unit);
 \draw[flow] (unit) -- (armA);
 \draw[flow] (armA) -- (armAs);
+\draw[fb]   (armAs) -- (excl);
 \draw[flow] (armB) -- (armBs);
-\draw[flow] (unit.west) -- ++(-5mm,0) |- (armB.west);
+\draw[fb]   (armBs) -- (cnt);
+\draw[flow] (unit.west) -- ++(-4mm,0) |- (armB.west);
 
 % ================= cot phai: PHAN TICH =================
-\node[prop, right=13mm of armA, yshift=-3mm] (cross)
-  {\textbf{Cross the two arms}};
-\node[sml, below=of cross] (crosss)
+\node[prop, right=16mm of armA] (cross) {\textbf{Cross the two arms}};
+\node[sml, below=of cross, text width=46mm] (crosss)
   {does position in the map predict the verdict?};
-\node[prop, below=7mm of crosss] (resamp)
-  {\textbf{Reconstruct 5\,000 small studies}};
-\node[sml, below=of resamp] (resamps)
+\node[prop, below=5mm of crosss] (resamp) {\textbf{Reconstruct 5\,000 small studies}};
+\node[sml, below=of resamp, text width=46mm] (resamps)
   {4 configurations $\times$ 5 seeds, resampled};
-\node[sml, below=7mm of resamps, fill=black!1] (out)
+\node[note, below=5mm of resamps, text width=46mm] (out)
   {what a study of the usual size would conclude};
 
 \draw[flow] (cross) -- (crosss);
 \draw[flow] (crosss) -- (resamp);
 \draw[flow] (resamp) -- (resamps);
 \draw[flow] (resamps) -- (out);
-\draw[flow] (armAs.east) -- ++(4mm,0) |- (cross.west);
-\draw[flow] (armBs.east) -- ++(6mm,0) |- (crosss.east);
+
+% ⛔ Dinh tuyen qua MOT COT DOC RIENG o x = xr, nam giua hai vung, nen khong mui ten nao
+%    cat qua hop nao. Ban truoc di thang tu armBs sang crosss va gach ngang chu trong do.
+\coordinate (xr) at ($(armA.east)!0.5!(cross.west)$);
+\draw[flow] (armAs.east) -- (armAs.east -| xr) |- (cross.west);
+\draw[flow] (armBs.east) -- (armBs.east -| xr) |- (crosss.west);
 
 % ================= vung nhom =================
 \begin{scope}[on background layer]
-  \node[zone, fit=(gen)(cnt), label={[zlab, anchor=south west]south west:MEASURE}] {};
-  \node[zone, fit=(cross)(out), label={[zlab, anchor=south west]south west:ANALYSE}] {};
+  \node[zone, fit=(gen)(armA)(armAs)(excl)(armB)(armBs)(cnt),
+        label={[zlab, anchor=south west]south west:MEASURE}] {};
+  \node[zone, fit=(cross)(crosss)(resamp)(resamps)(out),
+        label={[zlab, anchor=south west]south west:ANALYSE}] {};
 \end{scope}
 \end{tikzpicture}
 \end{document}
