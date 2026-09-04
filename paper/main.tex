@@ -73,6 +73,10 @@ analysis \and Benchmarking \and Reproducibility \and Resource allocation.}
 % =====================================================================
 \section{Introduction}
 
+Section~\ref{sec:background} gives the setting, Section~\ref{sec:conventions} separates the
+conventions we adopt from the observations we contribute, and Section~\ref{sec:protocol} states
+the protocol; the implications are drawn together in Section~\ref{sec:discussion}.
+
 Space-air-ground integrated networks (SAGINs) combine low Earth orbit constellations,
 high-altitude platforms, unmanned aerial vehicles and terrestrial cells into one programmable
 fabric, and non-terrestrial networks (NTN) are now a first-class component of the 3GPP releases.
@@ -97,8 +101,8 @@ not to invent those remedies. It is to apply them together, to one concrete non-
 allocation problem, and to report what changes.
 
 \paragraph{What we do.}
-We take a multi-beam power allocation problem with amplifier distortion and run two arms under
-one protocol. The first maps the \emph{instance space}: for every configuration in a grid we ask
+Figure~\ref{fig:protocol} summarises the design. We take a multi-beam power allocation problem
+with amplifier distortion and run two arms under one protocol. The first maps the \emph{instance space}: for every configuration in a grid we ask
 whether the objective is multimodal, using multi-start local search with an explicit separation
 threshold and with three categories of run excluded from the count and reported rather than
 silently dropped. The second compares four optimisers at a matched evaluation budget with
