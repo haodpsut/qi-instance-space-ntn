@@ -1,0 +1,5 @@
+# Khai doi thu cho moi cau so sanh co chu so trong abstract.
+# ⚠ Vu tru doi chieu la tab3-methods.tex, bang liet ke DU BON bo giai. Bang do duoc THEM VAO
+#   chinh vi cong nay bat duoc rang abstract noi "so bon bo giai" ma bang chi trinh bay hai.
+restart local search is best or tied => vs: QI particle swarm, CMA-ES, Differential evolution, Restart L-BFGS-B | universe: tab3-methods.tex
+never once reverses => vs: QI particle swarm, CMA-ES, Differential evolution, Restart L-BFGS-B | universe: tab3-methods.tex

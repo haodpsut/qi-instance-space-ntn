@@ -1,0 +1,66 @@
+{
+ "n_studies": 5000,
+ "study_cells": 4,
+ "study_seeds": 5,
+ "full_data_units": 144,
+ "full_data_seeds": 30,
+ "truth": {
+  "restart-lbfgs": {
+   "win": 0,
+   "loss": 79,
+   "n": 144,
+   "verdict": "QI behind"
+  },
+  "cmaes": {
+   "win": 80,
+   "loss": 15,
+   "n": 144,
+   "verdict": "QI ahead"
+  },
+  "de": {
+   "win": 114,
+   "loss": 4,
+   "n": 144,
+   "verdict": "QI ahead"
+  }
+ },
+ "small_study_verdicts": {
+  "restart-lbfgs": {
+   "QI ahead": 6,
+   "QI behind": 4470,
+   "tie": 524
+  },
+  "cmaes": {
+   "QI ahead": 4025,
+   "QI behind": 275,
+   "tie": 700
+  },
+  "de": {
+   "QI ahead": 4866,
+   "QI behind": 26,
+   "tie": 108
+  }
+ },
+ "region_mix": {
+  "toan don cuc tri": 411,
+  "toan da cuc tri": 174,
+  "hon hop": 4415
+ },
+ "verdict_by_mix": {
+  "toan don cuc tri": {
+   "QI ahead": 1,
+   "QI behind": 133,
+   "tie": 277
+  },
+  "toan da cuc tri": {
+   "QI ahead": 0,
+   "QI behind": 174,
+   "tie": 0
+  },
+  "hon hop": {
+   "QI ahead": 5,
+   "QI behind": 4163,
+   "tie": 247
+  }
+ }
+}
