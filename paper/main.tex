@@ -129,10 +129,15 @@ another method would be.
 
 \subsection{Resource allocation in non-terrestrial networks}
 
-Power and beam allocation in multi-beam satellite and aerial systems is a long-standing problem.
-The objective is typically a sum rate or a fairness-weighted variant, the constraints are a total
-power budget and per-beam limits, and the coupling between beams comes through interference. Two
-features make the non-terrestrial case harder than its terrestrial counterpart.
+Power and beam allocation in multi-beam satellite and aerial systems is a long-standing
+problem~\cite{ntnsurvey}. The objective is typically a sum rate or a fairness-weighted variant,
+the constraints are a total power budget and per-beam limits, and the coupling between beams
+comes through interference; formulations of this kind appear both as fractional
+programmes~\cite{ntnfrac} and as joint beam-direction and resource problems in dynamic LEO
+constellations~\cite{ntnbeam}. Non-terrestrial access became a first-class part of the
+standards with 3GPP Release~17, and the deployment experience since then is
+surveyed in~\cite{ntnroad}. Two features make the non-terrestrial case harder than its
+terrestrial counterpart.
 
 The first is mobility. The geometry changes continuously, so an allocation is solved repeatedly
 rather than once, and the operating point moves through the parameter space over the course of a
@@ -141,7 +146,8 @@ power, and the resulting nonlinearity introduces a term that is neither convex n
 
 Both features matter for evaluation, and the first matters most for this paper. If the operating
 point moves, then a claim established at one operating point is not automatically a claim about
-the system. This is the sense in which evaluation for NTN is evaluation under non-stationarity,
+the system. This is why learning and optimisation methods for these networks are increasingly
+evaluated over a range of operating conditions rather than a nominal one~\cite{ntnsurvey}. This is the sense in which evaluation for NTN is evaluation under non-stationarity,
 and it is why a map is the right object to report rather than a point.
 
 \subsection{Quantum-inspired metaheuristics}
@@ -152,7 +158,12 @@ swarm optimisation replaces the velocity update of standard particle swarm with 
 drawn from a distribution whose width contracts over the run. Quantum-inspired evolutionary
 algorithms represent a population as probability amplitudes and update them with rotation gates.
 These methods run entirely on classical hardware, which is the source of their appeal for
-on-board or edge deployment where no quantum device is available.
+on-board or edge deployment where no quantum device is available. They have been applied to UAV
+trajectory planning~\cite{qpsouav,qpsomulti} and, more recently, to trajectory optimisation in
+low-altitude networks~\cite{qstate}; broader assessments of quantum and quantum-inspired
+optimisation for wireless systems are given in~\cite{qwireless,qi6g}, both of which conclude
+that these methods are best regarded as promising heuristics rather than established
+outperformers of classical solvers.
 
 A separate line of work has examined the search operators of such methods directly and released a
 benchmark harness for that purpose~\cite{qideflation}. That work studies synthetic benchmark
@@ -580,6 +591,42 @@ arXiv:2503.07329 (2025)
 \bibitem{twovariances}
 A tale of two variances: when single-seed benchmarks fail in Bayesian deep learning.
 arXiv:2604.23114 (2026)
+
+\bibitem{ntnsurvey}
+Revolutionizing future connectivity: a contemporary survey on AI-empowered satellite-based
+non-terrestrial networks in 6G. IEEE Commun. Surv. Tutor. (2024).
+DOI 10.1109/COMST.2023.3347145
+
+\bibitem{ntnroad}
+5G NR non-terrestrial networks: from early results to the road ahead. arXiv:2601.04882 (2026)
+
+\bibitem{ntnfrac}
+Non-terrestrial network (NTN): a novel alternate fractional programming for the downlink
+channels power allocation. arXiv:2401.10251 (2024)
+
+\bibitem{ntnbeam}
+Joint beam direction control and radio resource allocation in dynamic multi-beam LEO satellite
+networks. arXiv:2401.09711 (2024)
+
+\bibitem{qpsouav}
+UAV trajectory planning based on improved quantum particle swarm optimization. In: Lecture Notes
+in Electrical Engineering. Springer (2023). DOI 10.1007/978-981-99-7505-1\_63
+
+\bibitem{qpsomulti}
+Multi-strategy quantum particle swarm optimization for efficient path planning.
+J. Supercomput. (2025). DOI 10.1007/s11227-025-07901-8
+
+\bibitem{qstate}
+Quantum-driven state-reduction for reliable UAV trajectory optimization in low-altitude
+networks. arXiv:2510.17861 (2025)
+
+\bibitem{qwireless}
+Quantum optimization in wireless communication systems: principles and applications.
+arXiv:2512.02468 (2025)
+
+\bibitem{qi6g}
+Quantum-inspired real-time optimisation for 6G networks: opportunities, challenges and the road
+ahead. IEEE Access (2022)
 
 \bibitem{qideflation}
 A released benchmark harness for the analysis of quantum-inspired search operators on synthetic

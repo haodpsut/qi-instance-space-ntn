@@ -85,7 +85,7 @@ def fig_map():
 # ---------------------------------- Fig 2: yeu to nao sinh ra da cuc tri
 def fig_knobs():
     """Ba nut van tren cung mot truc, de thay ngay rang kappa la buoc nhay chu khong phai doc."""
-    fig, ax = plt.subplots(figsize=(3.35, 2.15))
+    fig, ax = plt.subplots(figsize=(2.18, 1.62))   # dat o 0,47 kho chu LNCS = 2,26 in
     styles = [(KS, "K", "$K$ (beams)", "o", "-", INK),
               (GM, "gmax", r"$g_{\max}$ (interference)", "s", "--", ACCENT),
               (KA, "kappa", r"$\kappa$ (distortion)", "^", "-", "#aa2d2d")]
@@ -111,7 +111,7 @@ def fig_knobs():
 def fig_per_unit():
     """⭐ Ve TAT CA 144 don vi. Cot chong chi cho ba con so; hinh nay cho thay phan bo, va cho
     thay ngay rang KHONG mot don vi nao nam ben phai vach 0."""
-    fig, ax = plt.subplots(figsize=(3.35, 2.15))
+    fig, ax = plt.subplots(figsize=(2.22, 1.62))   # dat o 0,49 kho chu LNCS = 2,35 in
     rng = np.random.default_rng(7)
     for lab, want, col, mk in (("unimodal", False, "#7f8c9b", "o"),
                                ("multimodal", True, ACCENT, "^")):
@@ -142,7 +142,7 @@ def fig_effect_vs_noise():
     """⛔ Ban truoc LOAI 32/144 o co do lech seed = 0 va khong noi ra. Do khong phai du lieu
     thieu, do la MOT KET QUA: ca hai phuong phap tat dinh tren 30 seed o cac o ay. Ban nay ve
     chung thanh mot dai rieng co nhan, chu khong bo."""
-    fig, ax = plt.subplots(figsize=(3.35, 2.15))
+    fig, ax = plt.subplots(figsize=(2.22, 1.62))   # dat o 0,49 kho chu LNCS = 2,35 in
     FLOOR = None
     pts = {False: [], True: []}
     zeros = {False: 0, True: 0}
