@@ -10,6 +10,7 @@
 import io
 import json
 import os
+import re
 
 import matplotlib
 matplotlib.use("Agg")
@@ -37,6 +38,42 @@ plt.rcParams.update({
     "lines.linewidth": 1.1,
     "pdf.fonttype": 42, "ps.fonttype": 42,
     "figure.dpi": 300, "savefig.bbox": "tight", "savefig.pad_inches": 0.02})
+
+
+# =====================================================================
+# ⛔ THEM 05/09/2026. Hao nhin ra bang mat: "sao co hinh tu dung luc nho, co hinh lon vay?"
+# Do la that: co chu hieu dung cua sau hinh bai nay chay tu 7,5pt den 9,9pt, lech 24%.
+#
+# Nguyen nhan: `savefig.bbox="tight"` cat khung theo NOI DUNG, nen be rong tep ra KHAC be rong
+# `figsize` da yeu cau, va khac nhau tung hinh tuy nhan truc dai ngan. Dua tat ca vao bai o
+# \textwidth thi moi hinh bi co gian MOT HE SO KHAC NHAU.
+#
+# ⇒ Ghi lap lai cho toi khi be rong THAT bang be rong SE DUNG. Le phai gan nhu co dinh theo
+#   inch nen `figw_moi = figw + (dich - do_duoc)` hoi tu sau vai vong.
+def save_at(fig, path, target_w):
+    got = None
+    for _ in range(6):
+        fig.savefig(path)
+        blob = open(path, "rb").read()
+        mm = re.findall(rb"/MediaBox\s*\[([^\]]*)\]", blob)
+        if not mm:
+            break
+        x0, y0, x1, y1 = [float(v) for v in mm[0].split()]
+        got = (x1 - x0) / 72.0
+        if abs(got - target_w) < 0.005:
+            break
+        w, h = fig.get_size_inches()
+        fig.set_size_inches(w + (target_w - got), h)
+    print("     %-30s %.2f in (dich %.2f)" % (os.path.basename(path), got or -1, target_w))
+
+
+# Be rong THAT se dung trong main.tex. LNCS textwidth = 4.80 in.
+W_TEXT_LNCS = 4.80
+TARGET = {"fig1-instance-space.pdf": W_TEXT_LNCS,
+          "fig2-knobs.pdf": 0.47 * W_TEXT_LNCS,
+          "fig3-per-unit.pdf": 0.49 * W_TEXT_LNCS,
+          "fig4-effect-vs-seed-noise.pdf": 0.49 * W_TEXT_LNCS,
+          "fig5-underpowered.pdf": W_TEXT_LNCS}
 ACCENT, INK = "#2C6E9B", "#3A3F47"
 
 D = json.load(io.open(SRC, encoding="utf-8"))
@@ -103,7 +140,7 @@ def fig_map():
     cb.ax.set_yticklabels(["0/3", "1/3", "2/3", "3/3"], fontsize=6.2)
     cb.set_label("instances that are multimodal", fontsize=6.6, labelpad=2)
     cb.outline.set_linewidth(0.5)
-    fig.savefig(os.path.join(OUT, "fig1-instance-space.pdf"))
+    save_at(fig, os.path.join(OUT, "fig1-instance-space.pdf"), TARGET["fig1-instance-space.pdf"])
     plt.close(fig)
 
 
@@ -128,7 +165,7 @@ def fig_knobs():
     ax.set_ylabel("multimodal units (\\%)", fontsize=7.2)
     ax.grid(True, axis="y", linewidth=0.3, alpha=0.35)
     ax.legend(frameon=False, loc="upper left")
-    fig.savefig(os.path.join(OUT, "fig2-knobs.pdf"))
+    save_at(fig, os.path.join(OUT, "fig2-knobs.pdf"), TARGET["fig2-knobs.pdf"])
     plt.close(fig)
 
 
@@ -165,7 +202,7 @@ def fig_per_unit():
     ax.text(0.02, 0.965, "no unit lies to the right of zero", transform=ax.transAxes,
             fontsize=6.0, color="#aa2d2d", va="top")
     ax.grid(True, axis="x", linewidth=0.3, alpha=0.35)
-    fig.savefig(os.path.join(OUT, "fig3-per-unit.pdf"))
+    save_at(fig, os.path.join(OUT, "fig3-per-unit.pdf"), TARGET["fig3-per-unit.pdf"])
     plt.close(fig)
 
 
@@ -206,7 +243,7 @@ def fig_effect_vs_noise():
     ax.set_ylim(0, max(max(vals[False]), max(vals[True])) * 1.24)
     ax.legend(fontsize=6.2, frameon=False, loc="upper right")
     ax.grid(True, axis="y", linewidth=0.3, alpha=0.35)
-    fig.savefig(os.path.join(OUT, "fig4-effect-vs-seed-noise.pdf"))
+    save_at(fig, os.path.join(OUT, "fig4-effect-vs-seed-noise.pdf"), TARGET["fig4-effect-vs-seed-noise.pdf"])
     plt.close(fig)
 
 
@@ -341,7 +378,7 @@ def fig_underpowered():
     ax2.set_xlabel("% of reconstructed small studies"); ax2.set_xlim(0, 100)
     ax2.set_title("where the study screened", fontsize=8)
     ax2.invert_yaxis()
-    fig.savefig(os.path.join(OUT, "fig5-underpowered.pdf"))
+    save_at(fig, os.path.join(OUT, "fig5-underpowered.pdf"), TARGET["fig5-underpowered.pdf"])
     plt.close(fig)
 
 
